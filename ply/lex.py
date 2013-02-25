@@ -297,7 +297,7 @@ class Lexer:
 
 
     # ------------------------------------------------------------
-    # skip() - Token generator
+    # tokens() - Token generator
     # ------------------------------------------------------------
     def tokens(self):
         while True:
