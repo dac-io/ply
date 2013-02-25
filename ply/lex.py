@@ -716,29 +716,18 @@ class LexerReflect(object):
                 self.error = 1
 
         # If ordered == True, sort according to the orders specified in tokens
-        # TODO
-        # self.log.info('Ordered? %s', self.ordered)
 
         if self.ordered:
-            for f in self.funcsym.values():
+            for fs in (self.funcsym.values() + self.strsym.values()):
                 if sys.version_info[0] < 3:
-
-                    def sort_by_token_order(x, y):
-                        xf = x[0]
-                        # TODO
-                        # self.log.info('xf: %r', xf)
-                        xtok = self.toknames[xf]
-                        # self.log.info('xtok: %s', xtok)
-                        yf = y[0]
-                        # self.log.info('yf: %r', yf)
-                        ytok = self.toknames[yf]
-                        return cmp(self.tokens.index(xtok), self.tokens.index(ytok))
-
-                    f.sort(sort_by_token_order)
+                    fs.sort(lambda x, y: cmp(
+                        self.tokens.index(self.toknames[x[0]]),
+                        self.tokens.index(self.toknames[y[0]]),
+                        )
+                    )
                 else:
                     # Python 3.0
-                    f.sort(key=lambda x: self.tokens.index(self.toknames[x[0]]))
-
+                    fs.sort(key=lambda x: self.tokens.index(self.toknames[x[0]]))
         else:
             # Sort the functions by line number
             for f in self.funcsym.values():

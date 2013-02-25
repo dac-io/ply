@@ -612,24 +612,32 @@ class LexRunTests(unittest.TestCase):
                                     "(NUMBER,'10',1,32)\n"
                                     ))
 
-
     def test_lex_tokens_ordering(self):
         run_import("lex_tokens_ordering")
         result = sys.stdout.getvalue()
 
-        # Parsing '+ - = : ++ -- == :='
+        # Parsing '* / | & ** // || && + - = : ++ -- == ::'
 
         self.assert_(check_expected(result,
-                                    "(PLUS,'+',1,0)\n"
-                                    "(MINUS,'-',1,2)\n"
-                                    "(ASSIGN,'=',1,4)\n"
-                                    "(ASTYPE,':',1,6)\n"
-                                    "(PLUS,'+',1,8)\n"
-                                    "(PLUS,'+',1,9)\n"
-                                    "(DEC,'--',1,11)\n"
-                                    "(ASSIGN,'=',1,14)\n"
-                                    "(ASSIGN,'=',1,15)\n"
-                                    "(DECLARE,':=',1,17)\n"
+                                    "(TIMES,'*',1,0)\n"
+                                    "(DIVIDE,'/',1,2)\n"
+                                    "(BITOR,'|',1,4)\n"
+                                    "(BITAND,'&',1,6)\n"
+                                    "(TIMES,'*',1,8)\n"
+                                    "(TIMES,'*',1,9)\n"
+                                    "(TRUNCATE,'//',1,11)\n"
+                                    "(BITOR,'|',1,14)\n"
+                                    "(BITOR,'|',1,15)\n"
+                                    "(AND,'&&',1,17)\n"
+                                    "(PLUS,'+',1,20)\n"
+                                    "(MINUS,'-',1,22)\n"
+                                    "(ASSIGN,'=',1,24)\n"
+                                    "(ASTYPE,':',1,26)\n"
+                                    "(PLUS,'+',1,28)\n"
+                                    "(PLUS,'+',1,29)\n"
+                                    "(DEC,'--',1,31)\n"
+                                    "(ASSIGN,'=',1,34)\n"
+                                    "(ASSIGN,'=',1,35)\n"
+                                    "(NAMESPACE,'::',1,37)\n"
                                     ))
-
 unittest.main()
