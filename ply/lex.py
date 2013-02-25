@@ -34,7 +34,7 @@
 __version__    = "3.5"
 __tabversion__ = "3.5"       # Version of table file used
 
-import re, sys, types, copy, os
+import re, sys, types, copy, os, collections
 
 # This tuple contains known string types
 try:
@@ -137,6 +137,7 @@ class Lexer:
         self.lexmodule = None         # Module
         self.lineno = 1               # Current line number
         self.lexoptimize = 0          # Optimized mode
+        self.lextokdq = collections.deque()  # Store generated tokens
 
     def clone(self,object=None):
         c = copy.copy(self)
@@ -307,6 +308,11 @@ class Lexer:
         lexlen    = self.lexlen
         lexignore = self.lexignore
         lexdata   = self.lexdata
+        lextokdq  = self.lextokdq
+
+        if len(lextokdq) > 0:
+            newtok = lextokdq.popleft()
+            return newtok
 
         while lexpos < lexlen:
             # This code provides some short-circuit code for whitespace, tabs, and other ignored characters
@@ -345,20 +351,34 @@ class Lexer:
                 self.lexmatch = m
                 self.lexpos = lexpos
 
-                newtok = func(tok)
+                try:
+                    # Assume func is a generator
+                    newtoks = list(func(tok))
 
-                # Every function must return a token, if nothing, we just move to next token
-                if not newtok:
-                    lexpos    = self.lexpos         # This is here in case user has updated lexpos.
-                    lexignore = self.lexignore      # This is here in case there was a state change
-                    break
+                except TypeError:
+                    # Handle normal functions
+                    newtok = func(tok)
 
-                # Verify type of the token.  If not in the token map, raise an error
-                if not self.lexoptimize:
-                    if not newtok.type in self.lextokens:
-                        raise LexError("%s:%d: Rule '%s' returned an unknown token type '%s'" % (
-                            func_code(func).co_filename, func_code(func).co_firstlineno,
-                            func.__name__, newtok.type),lexdata[lexpos:])
+                    # Every function must return a token, if nothing, we just move to next token
+                    if newtok is None:
+                        lexpos    = self.lexpos         # This is here in case user has updated lexpos.
+                        lexignore = self.lexignore      # This is here in case there was a state change
+                        break
+
+                    newtoks = [newtok]
+
+                for newtok in newtoks:
+                    # Verify type of the token.  If not in the token map, raise an error
+                    if not self.lexoptimize:
+                        if not newtok.type in self.lextokens:
+                            raise LexError("%s:%d: Rule '%s' returned an unknown token type '%s'" % (
+                                func_code(func).co_filename, func_code(func).co_firstlineno,
+                                func.__name__, newtok.type),lexdata[lexpos:])
+
+                    # Push a generatorated token to processing
+                    lextokdq.append(newtok)
+
+                newtok = lextokdq.popleft()
 
                 return newtok
             else:
