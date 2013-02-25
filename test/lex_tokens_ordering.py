@@ -91,16 +91,12 @@ if __name__ == '__main__':
     lexer = lex.lex(ordered=True, debug=True)
 
     lexer.input(sys.argv[1])
-    while True:
-        token = lexer.token()
-        if token is not None:
-            if hasattr(token, 'lexer'):
-                l = token.lexer
-                print token, l.lexpos, l.lexstate
-            else:
-                print token, 'DONE'
+    for token in lexer.tokens():
+        if hasattr(token, 'lexer'):
+            l = token.lexer
+            print token, l.lexpos, l.lexstate
         else:
-            break
+            print token, 'DONE'
 
 else:
     lex.lex(ordered=True)
