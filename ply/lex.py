@@ -295,6 +295,19 @@ class Lexer:
     def skip(self,n):
         self.lexpos += n
 
+
+    # ------------------------------------------------------------
+    # skip() - Token generator
+    # ------------------------------------------------------------
+    def tokens(self):
+        while True:
+            tok = self.token()
+            if tok is None:
+                break
+            else:
+                yield tok
+
+
     # ------------------------------------------------------------
     # opttoken() - Return the next token from the Lexer
     #
